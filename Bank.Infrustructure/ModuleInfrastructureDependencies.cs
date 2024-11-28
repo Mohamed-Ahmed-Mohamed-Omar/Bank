@@ -1,4 +1,5 @@
-﻿using Bank.Infrustructure.Abstracts;
+﻿using Bank.InfrastructureBases;
+using Bank.Infrustructure.Abstracts;
 using Bank.Infrustructure.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -8,6 +9,8 @@ namespace Bank.Infrustructure
     {
         public static IServiceCollection AddInfrastructureDependencies(this IServiceCollection services)
         {
+            services.AddTransient(typeof(IGenericRepositoryAsync<>), typeof(GenericRepositoryAsync<>));
+
             services.AddTransient<IPaymentRepository, PaymentRepository>();
 
             services.AddTransient<IAccountRepository, AccountRepository>();

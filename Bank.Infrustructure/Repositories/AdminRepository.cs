@@ -1,4 +1,5 @@
-﻿using Bank.Data.Entities.Identity;
+﻿using Azure.Core;
+using Bank.Data.Entities.Identity;
 using Bank.Infrustructure.Abstracts;
 using Bank.Infrustructure.Context;
 using Microsoft.AspNetCore.Identity;

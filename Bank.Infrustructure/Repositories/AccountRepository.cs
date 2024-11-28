@@ -1,4 +1,5 @@
 ﻿using Bank.Data.Entities;
+using Bank.InfrastructureBases;
 using Bank.Infrustructure.Abstracts;
 using Bank.Infrustructure.Context;
 using Microsoft.EntityFrameworkCore;
@@ -82,7 +83,7 @@ namespace Bank.Infrustructure.Repositories
               var data = _context.accounts
                 .Where(s =>s.Id == int.Parse(id) || s.UserId == id || s.AccountNumber == id) 
                 .Select(s => new
-                {
+    {
                     Id = s.Id,
                     AccountNumber = s.AccountNumber,
                     Balance = s.Balance,
