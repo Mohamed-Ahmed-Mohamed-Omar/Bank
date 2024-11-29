@@ -1,6 +1,5 @@
 ﻿using Bank.Data.Entities;
 using Bank.Data.Entities.Identity;
-using EntityFrameworkCore.EncryptColumn.Extension;
 using EntityFrameworkCore.EncryptColumn.Interfaces;
 using EntityFrameworkCore.EncryptColumn.Util;
 using Microsoft.AspNetCore.Identity;
@@ -26,12 +25,29 @@ namespace Bank.Infrustructure.Context
 
         private static void SeedRoles(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<IdentityRole>().HasData
-                (
-                new IdentityRole() { Name = "Admin", ConcurrencyStamp = "1", NormalizedName = "Admin" },
-                new IdentityRole() { Name = "User", ConcurrencyStamp = "2", NormalizedName = "User" },
-                new IdentityRole() { Name = "Accountant", ConcurrencyStamp = "3", NormalizedName = "Accountant" }
-                );
+            modelBuilder.Entity<IdentityRole>().HasData(
+                new IdentityRole
+                {
+                    Id = "a1d9b7f2-5c9e-4a7d-b12a-c32b8e08e16f", // GUID ثابت للدور Admin
+                    Name = "Admin",
+                    NormalizedName = "ADMIN",
+                    ConcurrencyStamp = "1"
+                },
+                new IdentityRole
+                {
+                    Id = "b2f3c21a-345d-4570-97f7-e5e0d5eafc91", // GUID ثابت للدور User
+                    Name = "User",
+                    NormalizedName = "USER",
+                    ConcurrencyStamp = "2"
+                },
+                new IdentityRole
+                {
+                    Id = "c3f8a452-d78b-42e6-9b9f-987fb6a5f0c4", // GUID ثابت للدور Accountant
+                    Name = "Accountant",
+                    NormalizedName = "ACCOUNTANT",
+                    ConcurrencyStamp = "3"
+                }
+            );
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -44,8 +60,10 @@ namespace Bank.Infrustructure.Context
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
             SeedRoles(modelBuilder);
+
             modelBuilder.Entity<ApplicationUser>()
                 .Property(u => u.Code)
                 .HasConversion(

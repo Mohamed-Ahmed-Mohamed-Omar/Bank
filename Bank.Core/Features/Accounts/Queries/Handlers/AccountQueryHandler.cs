@@ -52,7 +52,7 @@ namespace Bank.Core.Features.Accounts.Queries.Handlers
         public async Task<Response<GetAccountByNameResponse>> Handle(GetAccountByNameQuery request, CancellationToken cancellationToken)
         {
             // Retrieve the username from the current user context
-            var username = _currentUserService.GetUserName();
+            var username = _currentUserService.GetUserNameAsync();
 
             if (string.IsNullOrEmpty(username))
             {
@@ -89,7 +89,7 @@ namespace Bank.Core.Features.Accounts.Queries.Handlers
         public async Task<Response<GetAccountByIdResponse>> Handle(GetAccountByIdQuery request, CancellationToken cancellationToken)
         {
             // Fetch the account using the repository
-            var account = await _accountServices.GetAccountAsync(request.Id);
+            var account = await _accountServices.GetAccountByIdAsync(request.Id);
 
             if (account == null)
             {

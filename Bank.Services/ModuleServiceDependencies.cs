@@ -10,6 +10,8 @@ namespace Bank.Services
     {
         public static IServiceCollection AdddServiceDependencies(this IServiceCollection services)
         {
+            services.AddScoped<ICurrentUserService, CurrentUserService>();
+
             services.AddTransient<ICurrentUserService, CurrentUserService>();
 
             services.AddTransient<IAuthenticationService, AuthenticationService>();

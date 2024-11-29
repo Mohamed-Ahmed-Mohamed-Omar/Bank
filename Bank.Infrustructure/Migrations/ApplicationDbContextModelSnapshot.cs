@@ -40,13 +40,11 @@ namespace Bank.Infrustructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("UserId")
+                    b.Property<string>("UserName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("accounts");
                 });
@@ -196,13 +194,11 @@ namespace Bank.Infrustructure.Migrations
                     b.Property<int?>("ReceiverAccountId")
                         .HasColumnType("int");
 
-                    b.Property<string>("ReferenceNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("ReferenceNumber")
+                        .HasColumnType("int");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<byte>("Status")
+                        .HasColumnType("tinyint");
 
                     b.HasKey("Id");
 
@@ -244,24 +240,24 @@ namespace Bank.Infrustructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "ccffd897-794d-4f15-8979-4013a93ae58d",
+                            Id = "a1d9b7f2-5c9e-4a7d-b12a-c32b8e08e16f",
                             ConcurrencyStamp = "1",
                             Name = "Admin",
-                            NormalizedName = "Admin"
+                            NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "a084051b-662a-40a8-8ff4-38a848a5cb1a",
+                            Id = "b2f3c21a-345d-4570-97f7-e5e0d5eafc91",
                             ConcurrencyStamp = "2",
                             Name = "User",
-                            NormalizedName = "User"
+                            NormalizedName = "USER"
                         },
                         new
                         {
-                            Id = "753e90bc-1885-4e6e-9d7e-7536f71d0c16",
+                            Id = "c3f8a452-d78b-42e6-9b9f-987fb6a5f0c4",
                             ConcurrencyStamp = "3",
                             Name = "Accountant",
-                            NormalizedName = "Accountant"
+                            NormalizedName = "ACCOUNTANT"
                         });
                 });
 
@@ -369,17 +365,6 @@ namespace Bank.Infrustructure.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
-                });
-
-            modelBuilder.Entity("Bank.Data.Entities.Account", b =>
-                {
-                    b.HasOne("Bank.Data.Entities.Identity.ApplicationUser", "User")
-                        .WithMany("Accounts")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Bank.Data.Entities.Identity.ApplicationUser", b =>
@@ -512,11 +497,6 @@ namespace Bank.Infrustructure.Migrations
             modelBuilder.Entity("Bank.Data.Entities.Account", b =>
                 {
                     b.Navigation("Payments");
-                });
-
-            modelBuilder.Entity("Bank.Data.Entities.Identity.ApplicationUser", b =>
-                {
-                    b.Navigation("Accounts");
                 });
 #pragma warning restore 612, 618
         }

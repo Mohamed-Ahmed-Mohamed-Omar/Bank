@@ -10,7 +10,6 @@ namespace Bank.Data.Entities.Identity
         [EncryptColumn]
         public string? Code { get; set; }
         public List<RefreshToken>? RefreshTokens { get; set; }
-        public List<Account>? Accounts { get; set; }
         public DateTime RegistrationDate { get; set; }
     }
 }

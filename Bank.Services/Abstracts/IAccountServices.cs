@@ -6,7 +6,8 @@ namespace Bank.Services.Abstracts
     {
         Task<string> CreateAccounAsync(Account account, string username);
         Task<string> DeleteAccountAsync(int id);
-        Task<IQueryable<object>> GetAllAccountsAsync();
-        Task<object> GetAccountAsync(string? id);
+        Task<IQueryable<Account>> GetAllAccountsAsync();
+        Task<Account> GetAccountAsync(string id);
+        Task<Account> GetAccountByIdAsync(string STRING);
     }
 }

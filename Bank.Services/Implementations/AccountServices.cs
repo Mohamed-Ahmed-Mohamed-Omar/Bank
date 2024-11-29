@@ -23,12 +23,17 @@ namespace Bank.Services.Implementations
             return await _accountRepository.DeleteAccountAsync(id);
         }
 
-        public async Task<object> GetAccountAsync(string id)
+        public async Task<Account> GetAccountAsync(string id)
         {
             return await _accountRepository.GetAccountAsync(id);
         }
 
-        public async Task<IQueryable<object>> GetAllAccountsAsync()
+        public async Task<Account> GetAccountByIdAsync(string username)
+        {
+            return await _accountRepository.GetAccountByIdAsync(username);
+        }
+
+        public async Task<IQueryable<Account>> GetAllAccountsAsync()
         {
             return await _accountRepository.GetAllAccountsAsync();
         }

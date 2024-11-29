@@ -1,18 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Bank.Data.Entities.Identity;
+using Bank.Services.AuthServices.Interfaces;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using System.Security.Claims;
 
 namespace Bank.Services.AuthServices.Implementations
 {
-    using Bank.Data.Entities.Identity;
-    using Bank.Services.AuthServices.Interfaces;
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Identity;
-    using System.Security.Claims;
-    using System.Threading.Tasks;
-
     public class CurrentUserService : ICurrentUserService
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
@@ -24,22 +17,50 @@ namespace Bank.Services.AuthServices.Implementations
             _userManager = userManager;
         }
 
-        public string GetUserId()
+        public string GetUserNameAsync()
         {
             return _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
         }
 
-        public string GetUserName()
-        {
-            return _httpContextAccessor.HttpContext?.User?.Identity?.Name;
-        }
-
         public async Task<ApplicationUser> GetCurrentUserAsync()
         {
-            var userId = GetUserId();
-            if (userId == null) return null;
+            var userId = _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
 
+            if (string.IsNullOrEmpty(userId))
+                return null;  // or throw an exception if userId is not found
+
+            // Return the full user object based on the userId
             return await _userManager.FindByIdAsync(userId);
+        }
+
+        public async Task<string> GetEmailByUsernameAsync(string username)
+        {
+            if (string.IsNullOrEmpty(username))
+                throw new ArgumentException("Username cannot be null or empty.");
+
+            // Retrieve the user by username
+            var user = await _userManager.FindByNameAsync(username);
+
+            if (user == null)
+                throw new ArgumentException($"User with username '{username}' does not exist.");
+
+            // Return the email
+            return user.Email;
+        }
+
+        public async Task<string> GetPhoneNumberByUsernameAsync(string username)
+        {
+            if (string.IsNullOrEmpty(username))
+                throw new ArgumentException("Username cannot be null or empty.");
+
+            // Retrieve the user by username
+            var user = await _userManager.FindByNameAsync(username);
+
+            if (user == null)
+                throw new ArgumentException($"User with username '{username}' does not exist.");
+
+            // Return the phone number
+            return user.PhoneNumber;
         }
     }
 

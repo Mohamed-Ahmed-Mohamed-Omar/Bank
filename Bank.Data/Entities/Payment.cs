@@ -27,13 +27,13 @@ namespace Bank.Data.Entities
         // The date the payment was made
         public DateTime PaymentDate { get; set; } = DateTime.Now;
 
-        // e.g., "Pending", "Completed", "Failed"
-        public string Status { get; set; }
+        // e.g., "Pending" = 2, "Completed" = 1, "Failed" = 0
+        public byte Status { get; set; }
 
         // Optional reference number for tracking
-        public string ReferenceNumber { get; set; }
+        public int ReferenceNumber { get; set; }
 
-        // e.g., "Credit Card", "Bank Transfer", "Cash
+        // e.g., "Credit Card", "Bank Transfer"
         public string PaymentMethod { get; set; } 
     }
 }

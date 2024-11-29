@@ -1,5 +1,4 @@
 ﻿using Bank.Data.Entities;
-using Bank.InfrastructureBases;
 using Bank.Infrustructure.Abstracts;
 using Bank.Infrustructure.Context;
 using Microsoft.EntityFrameworkCore;
@@ -26,19 +25,19 @@ namespace Bank.Infrustructure.Repositories
                     throw new ArgumentException("Balance cannot be negative.");
 
                 if (account.Balance < 100)
-                    throw new ArgumentException("Balance must be at least 100.");
+                    throw new ArgumentException("Balance must be at Greater Than 100.");
 
                 // Create a new Account object
                 Account newAccount = new Account
                 {
-                    UserId = userName,
+                    UserName = userName,
                     AccountNumber = GenerateRandomString(),
                     Balance = account.Balance,
                     CreatedAt = DateTime.UtcNow,
                 };
 
                 // Add to database and save changes
-                await _context.accounts.AddAsync(newAccount);
+                _context.accounts.Add(newAccount);
                 await _context.SaveChangesAsync();
 
                 return "Success";
@@ -47,11 +46,6 @@ namespace Bank.Infrustructure.Repositories
             {
                 // Handle specific validation exceptions
                 return $"Validation Error: {ex.Message}";
-            }
-            catch (DbUpdateException ex)
-            {
-                // Handle database update related exceptions (e.g., duplicate account number)
-                return $"Database Error: {ex.Message}";
             }
             catch (Exception ex)
             {
@@ -78,41 +72,36 @@ namespace Bank.Infrustructure.Repositories
             return "Account deleted successfully.";
         }
 
-        public async Task<object> GetAccountAsync(string id)
+        public async Task<Account> GetAccountAsync(string username)
         {
-              var data = _context.accounts
-                .Where(s =>s.Id == int.Parse(id) || s.UserId == id || s.AccountNumber == id) 
-                .Select(s => new
-    {
-                    Id = s.Id,
-                    AccountNumber = s.AccountNumber,
-                    Balance = s.Balance,
-                    CreatedAt = s.CreatedAt,
-                    UserId = s.UserId,
-                    Email = s.User.Email,
-                    Phone = s.User.PhoneNumber
-                });
+            var account = await _context.accounts
+                .AsNoTracking() // Optional: Use for read-only operations
+                .FirstOrDefaultAsync(s => s.UserName == username);
+
+            return account;
+        }
+
+        public async Task<IQueryable<Account>> GetAllAccountsAsync()
+        {
+            var data = _context.accounts.AsNoTracking();
 
             return data;
         }
 
-        public async Task<IQueryable<object>> GetAllAccountsAsync()
+        public async Task<Account> GetAccountByIdAsync(string id)
         {
-            var data = _context.accounts
-                .Where(s => s != null) 
-                .Select(s => new
-                {
-                    Id = s.Id,
-                    AccountNumber = s.AccountNumber,
-                    Balance = s.Balance,
-                    CreatedAt = s.CreatedAt,
-                    UserId = s.UserId,
-                    Email = s.User.Email,
-                    Phone = s.User.PhoneNumber
-                });
+            int accountId;
 
-            return data;
+            // Safely parse the id if it's numeric
+            var query = _context.accounts.AsNoTracking()
+                .Where(s => (int.TryParse(id, out accountId) && s.Id == accountId) || s.UserName == id || s.AccountNumber == id);
+
+            // Get the first matching account
+            var account = await query.FirstOrDefaultAsync();
+
+            return account;
         }
+
 
         private static string GenerateRandomString()
         {
@@ -136,6 +125,5 @@ namespace Bank.Infrustructure.Repositories
 
             return shuffled;
         }
-
     }
 }

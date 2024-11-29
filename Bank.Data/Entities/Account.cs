@@ -1,7 +1,4 @@
-﻿using Bank.Data.Entities.Identity;
-using System.ComponentModel.DataAnnotations.Schema;
-
-namespace Bank.Data.Entities
+﻿namespace Bank.Data.Entities
 {
     public class Account
     {
@@ -9,10 +6,7 @@ namespace Bank.Data.Entities
         public string AccountNumber { get; set; }
         public decimal Balance { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
-        public string UserId { get; set; }
-
-        [ForeignKey(nameof(UserId))]
-        public ApplicationUser User { get; set; }
-        public ICollection<Payment> Payments { get; set; }
+        public string UserName { get; set; }
+        public ICollection<Payment>? Payments { get; set; }
     }
 }

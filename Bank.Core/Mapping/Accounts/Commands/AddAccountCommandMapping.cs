@@ -7,7 +7,7 @@ namespace Bank.Core.Mapping.Accounts
     {
         public void AddAccountCommandMapping()
         {
-            CreateMap<AddAccountCommand, Account>();
+            CreateMap<AddAccountCommand, Account>().ReverseMap();
         }
     }
 }

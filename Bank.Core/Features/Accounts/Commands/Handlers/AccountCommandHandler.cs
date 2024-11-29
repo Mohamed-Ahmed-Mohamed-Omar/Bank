@@ -25,7 +25,7 @@ namespace Bank.Core.Features.Accounts.Commands.Handlers
         public async Task<Response<string>> Handle(AddAccountCommand request, CancellationToken cancellationToken)
         {
             // Retrieve the username from the current user context
-            var username = _currentUserService.GetUserName();
+            var username = _currentUserService.GetUserNameAsync();
 
             //mapping Between request and account
             var account = _mapper.Map<Account>(request);

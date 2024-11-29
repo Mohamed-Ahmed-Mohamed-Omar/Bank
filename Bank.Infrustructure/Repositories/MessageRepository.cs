@@ -8,11 +8,5 @@ namespace Bank.Infrustructure.Repositories
 {
     public class MessageRepository : IMessageRepository
     {
-        private DbSet<Message> _messages;
-
-        public MessageRepository(ApplicationDbContext context) : base(context)
-        {
-            _messages = context.Set<Message>();
-        }
     }
 }

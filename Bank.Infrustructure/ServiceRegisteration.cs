@@ -1,5 +1,8 @@
-﻿using Bank.Data.Helpers;
+﻿using Bank.Data.Entities.Identity;
+using Bank.Data.Helpers;
+using Bank.Infrustructure.Context;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
@@ -12,29 +15,29 @@ namespace Bank.Infrustructure
     {
         public static IServiceCollection AddServiceRegisteration(this IServiceCollection services, IConfiguration configuration)
         {
-            var emailSettings = new MailSetting();
-            var jwtSettings = new JWT();
+            services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>()
+                         .AddDefaultTokenProviders();
 
-            configuration.GetSection(nameof(jwtSettings)).Bind(jwtSettings);
+            var emailSettings = new MailSetting();
+
             configuration.GetSection(nameof(emailSettings)).Bind(emailSettings);
 
-            services.AddSingleton(jwtSettings);
             services.AddSingleton(emailSettings);
 
             #region JWT
 
             services.Configure<JWT>(configuration.GetSection("JWT"));
 
+            // Authorize for Bearer by Defualt without add to each controller
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
             })
                 .AddJwtBearer(o =>
                 {
                     o.RequireHttpsMetadata = false;
-                    o.SaveToken = true;
+                    o.SaveToken = false;
                     o.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateIssuerSigningKey = true,
@@ -43,10 +46,10 @@ namespace Bank.Infrustructure
                         ValidateLifetime = true,
                         ValidIssuer = configuration["JWT:Issuer"],
                         ValidAudience = configuration["JWT:Audience"],
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Key"])),
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(configuration["JWT:Key"])),
                         ClockSkew = TimeSpan.Zero
                     };
-                });
+                }); ;
 
 
             #endregion
