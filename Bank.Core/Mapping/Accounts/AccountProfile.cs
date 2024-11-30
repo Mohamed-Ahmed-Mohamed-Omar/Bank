@@ -7,9 +7,6 @@ namespace Bank.Core.Mapping.Accounts
         public AccountProfile() 
         {
             AddAccountCommandMapping();
-            GetAccountsPaginationReponseMapping();
-            GetAccountByNameResponseMapping();
-            GetAccountByIdMapping();
         }
     }
 }

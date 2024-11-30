@@ -24,7 +24,16 @@ namespace Bank.Api.Controllers
         {
             var response = await _mediator.Send(command);
             if (response.Success)
+            {
+                // Account created successfully
                 return Ok(response);
+            }
+            else if (response.RedirectUrl != null)
+            {
+                // Redirect to the existing account details page if account exists
+                return Redirect(response.RedirectUrl); // Redirect to the URL passed in the response
+            }
+
             return BadRequest(response);
         }
 

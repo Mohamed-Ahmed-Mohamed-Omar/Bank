@@ -29,8 +29,17 @@ namespace Bank.Core.Features.Accounts.Queries.Handlers
             // Fetch Accounts
             var accounts = await _accountServices.GetAllAccountsAsync();
 
-            // Use AutoMapper to map to GetAccountsPaginationReponse
-            var mappedAccounts = _mapper.Map<List<GetAccountsPaginationReponse>>(accounts);
+            // Map accounts to GetAccountsPaginationReponse
+            var mappedAccounts = accounts.Select(account => new GetAccountsPaginationReponse
+            {
+                Id = (int)account.GetType().GetProperty("Id").GetValue(account),
+                AccountNumber = (string)account.GetType().GetProperty("AccountNumber").GetValue(account),
+                Balance = (decimal)account.GetType().GetProperty("Balance").GetValue(account),
+                CreatedAt = (DateTime)account.GetType().GetProperty("CreatedAt").GetValue(account),
+                UserName = (string)account.GetType().GetProperty("UserName").GetValue(account),
+                Email = (string)account.GetType().GetProperty("Email").GetValue(account),
+                Phone = (string)account.GetType().GetProperty("Phone").GetValue(account)
+            }).AsQueryable();
 
             // Apply pagination
             IEnumerable<GetAccountsPaginationReponse> usersQuery;
@@ -63,7 +72,7 @@ namespace Bank.Core.Features.Accounts.Queries.Handlers
                 };
             }
 
-            // Fetch the account using the repository
+            // Fetch the account using the service
             var account = await _accountServices.GetAccountAsync(username);
 
             if (account == null)
@@ -76,7 +85,14 @@ namespace Bank.Core.Features.Accounts.Queries.Handlers
             }
 
             // Map the account data to the response DTO
-            var response = _mapper.Map<GetAccountByNameResponse>(account);
+            var response = new GetAccountByNameResponse
+            {
+                AccountNumber = (string)account.GetType().GetProperty("AccountNumber").GetValue(account),
+                Balance = (decimal)account.GetType().GetProperty("Balance").GetValue(account),
+                CreatedAt = (DateTime)account.GetType().GetProperty("CreatedAt").GetValue(account),
+                Email = (string)account.GetType().GetProperty("Email").GetValue(account),
+                Phone = (string)account.GetType().GetProperty("Phone").GetValue(account)
+            };
 
             return new Response<GetAccountByNameResponse>
             {
@@ -100,14 +116,22 @@ namespace Bank.Core.Features.Accounts.Queries.Handlers
                 };
             }
 
-            // Map the account data to the response DTO
-            var response = _mapper.Map<GetAccountByIdResponse>(account);
+            // Map accounts to GetAccountByIdResponse
+            var mappedAccounts = new GetAccountByIdResponse
+            {
+                AccountNumber = (string)account.GetType().GetProperty("AccountNumber").GetValue(account),
+                Balance = (decimal)account.GetType().GetProperty("Balance").GetValue(account),
+                CreatedAt = (DateTime)account.GetType().GetProperty("CreatedAt").GetValue(account),
+                UserName = (string)account.GetType().GetProperty("UserName").GetValue(account),
+                Email = (string)account.GetType().GetProperty("Email").GetValue(account),
+                Phone = (string)account.GetType().GetProperty("Phone").GetValue(account)
+            };
 
             return new Response<GetAccountByIdResponse>
             {
                 Success = true,
                 Message = "Account retrieved successfully.",
-                Data = response
+                Data = mappedAccounts
             }; ;
         }
     }

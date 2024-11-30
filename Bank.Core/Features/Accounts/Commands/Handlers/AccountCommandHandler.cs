@@ -13,42 +13,72 @@ namespace Bank.Core.Features.Accounts.Commands.Handlers
     {
         private readonly ICurrentUserService _currentUserService;
         private readonly IAccountServices _accountServices;
+        private readonly IEmailsService _emailsService;
         private readonly IMapper _mapper;
 
-        public AccountCommandHandler(IAccountServices accountServices, IMapper mapper, ICurrentUserService currentUserService)
+        public AccountCommandHandler(IAccountServices accountServices, IMapper mapper, ICurrentUserService currentUserService, IEmailsService emailsService)
         {
             _accountServices = accountServices;
             _mapper = mapper;
             _currentUserService = currentUserService;
+            _emailsService = emailsService;
         }
 
         public async Task<Response<string>> Handle(AddAccountCommand request, CancellationToken cancellationToken)
         {
             // Retrieve the username from the current user context
-            var username = _currentUserService.GetUserNameAsync();
+            var username =  _currentUserService.GetUserNameAsync(); // تأكد من استخدام await هنا
 
-            //mapping Between request and account
+            // Check if the user already has an account
+            var existingAccount = await _accountServices.GetAccountByUsernameAsync(username);
+            if (existingAccount != null)
+            {
+                return new Response<string>
+                {
+                    Success = false,
+                    Message = "You already have an account. Please view your account details.",
+                    RedirectUrl = "/Account/GetAccountByName" // Provide the URL to redirect
+                };
+            }
+
+            // Mapping Between request and account
             var account = _mapper.Map<Account>(request);
 
             try
             {
                 // Attempt to create the account
-                var result = await _accountServices.CreateAccounAsync(account, username);
+                var newAccount = await _accountServices.CreateAccounAsync(account, username);
 
-                if (result == "Success")
+                // Get the email for the created user
+                var email = await _currentUserService.GetEmailByUsernameAsync(username);
+
+                if (newAccount != null)
                 {
+                    // Send email after account creation
+                    var emailMessage = $@"
+                        Your account has been created successfully. Here are your details:
+
+                        Account Number: {newAccount.AccountNumber}
+                        Balance: {newAccount.Balance}
+                        Created At: {newAccount.CreatedAt}
+                    ";
+
+                    // Send the email and check the response (optional: check the actual result)
+                    var emailResponse = await _emailsService.SendEmail(email, emailMessage, "Account Created");
+
+                    // Return success response
                     return new Response<string>
                     {
                         Success = true,
-                        Message = "Account created successfully."
+                        Message = "Account created successfully and email sent."
                     };
                 }
 
-                // Handle specific service-layer errors
+                // Handle case where account creation fails
                 return new Response<string>
                 {
                     Success = false,
-                    Message = result
+                    Message = "Account creation failed."
                 };
             }
             catch (Exception ex)
