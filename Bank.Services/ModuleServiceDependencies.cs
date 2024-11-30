@@ -12,7 +12,7 @@ namespace Bank.Services
         {
             services.AddScoped<ICurrentUserService, CurrentUserService>();
 
-            services.AddTransient<ICurrentUserService, CurrentUserService>();
+            services.AddTransient<IPaymentServices, PaymentServices>();
 
             services.AddTransient<IAuthenticationService, AuthenticationService>();
 

@@ -27,7 +27,7 @@ namespace Bank.Data.Entities
         // The date the payment was made
         public DateTime PaymentDate { get; set; } = DateTime.Now;
 
-        // e.g., "Pending" = 2, "Completed" = 1, "Failed" = 0
+        // e.g., "Completed" = 1, "Failed" = 0
         public byte Status { get; set; }
 
         // Optional reference number for tracking

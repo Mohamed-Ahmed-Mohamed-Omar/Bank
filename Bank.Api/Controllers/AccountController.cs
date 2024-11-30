@@ -23,16 +23,17 @@ namespace Bank.Api.Controllers
         public async Task<IActionResult> AddAccount([FromBody] AddAccountCommand command)
         {
             var response = await _mediator.Send(command);
-            if (response.Success)
-            {
-                // Account created successfully
-                return Ok(response);
-            }
-            else if (response.RedirectUrl != null)
-            {
-                // Redirect to the existing account details page if account exists
-                return Redirect(response.RedirectUrl); // Redirect to the URL passed in the response
-            }
+            //if (response.Success)
+            //{
+            //    // Account created successfully
+            //    return Ok(response);
+            //}
+            //else if (response.RedirectUrl != null)
+            //{
+            //    // Redirect to the existing account details page if account exists
+            //    return Redirect(response.RedirectUrl); // Redirect to the URL passed in the response
+            //}
+            return Ok(response);
 
             return BadRequest(response);
         }
