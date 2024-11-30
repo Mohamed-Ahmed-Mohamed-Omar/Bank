@@ -56,13 +56,26 @@ namespace Bank.Core.Features.Accounts.Commands.Handlers
                 {
                     // Send email after account creation
                     var emailMessage = $@"
-                        Your account has been created successfully. Here are your details:
-
-                        Account Number: {newAccount.AccountNumber}
-                        Balance: {newAccount.Balance}
-                        Created At: {newAccount.CreatedAt}
+                        <html>
+                        <body>
+                            <p>Your account has been created successfully. Here are your details:</p>
+                            <table border='1'>
+                                <tr>
+                                    <td><strong>Account Number:</strong></td>
+                                    <td>{newAccount.AccountNumber}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Balance:</strong></td>
+                                    <td>{newAccount.Balance}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Created At:</strong></td>
+                                    <td>{newAccount.CreatedAt}</td>
+                                </tr>
+                            </table>
+                        </body>
+                        </html>
                     ";
-
                     // Send the email and check the response (optional: check the actual result)
                     var emailResponse = await _emailsService.SendEmail(email, emailMessage, "Account Created");
 

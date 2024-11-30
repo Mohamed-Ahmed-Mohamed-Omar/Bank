@@ -37,7 +37,7 @@ namespace Bank.Infrustructure.Repositories
                     UserName = userName,
                     AccountNumber = GenerateRandomString(),
                     Balance = account.Balance,
-                    CreatedAt = DateTime.UtcNow,
+                    CreatedAt = DateTime.Now,
                 };
 
                 // Add to database and save changes
@@ -155,7 +155,7 @@ namespace Bank.Infrustructure.Repositories
         {
             // Fetch the account record without async operations
             var account = await _context.accounts
-                .Where(s => s.Id == int.Parse(id) || s.UserName == id || s.AccountNumber == id)
+                .Where(s => s.Id == int.Parse(id) || s.UserName == id || s.AccountNumber == int.Parse(id))
                 .Select(s => new
                 {
                     s.Id,
@@ -193,16 +193,16 @@ namespace Bank.Infrustructure.Repositories
                                   .FirstOrDefaultAsync(acc => acc.UserName == username);
         }
 
-        public async Task<Account> GetAccountByAccountNumberAsync(string accountNumber)
+        public async Task<Account> GetAccountByAccountNumberAsync(int accountNumber)
         {
-            if (string.IsNullOrEmpty(accountNumber))
+            if (accountNumber <= 0)
             {
-                throw new ArgumentNullException(nameof(accountNumber), "Account number cannot be null or empty.");
+                throw new ArgumentException("Account number must be a positive integer.", nameof(accountNumber));
             }
 
-            // Use LINQ to query the database for the account with the specified account number
+            // البحث عن الحساب باستخدام LINQ
             var account = await _context.accounts
-                .FirstOrDefaultAsync(a => a.AccountNumber == accountNumber);
+                .FirstOrDefaultAsync(a => a.AccountNumber == accountNumber || a.Id == accountNumber);
 
             if (account == null)
             {
@@ -223,27 +223,19 @@ namespace Bank.Infrustructure.Repositories
             await _context.SaveChangesAsync();
         }
 
-        private static string GenerateRandomString()
+        private static int GenerateRandomString()
         {
             Random random = new Random();
 
-            // Generate 4 random letters (a-z, A-Z)
-            string letters = new string(Enumerable.Range(0, 4)
-                .Select(_ => (char)(random.Next(0, 2) == 0
-                    ? random.Next('a', 'z' + 1) // Lowercase letter
-                    : random.Next('A', 'Z' + 1))) // Uppercase letter
-                .ToArray());
-
             // Generate 4 random digits (0-9)
-            string numbers = new string(Enumerable.Range(0, 4)
+            string numbers = new string(Enumerable.Range(0, 6)
                 .Select(_ => (char)random.Next('0', '9' + 1))
                 .ToArray());
 
             // Combine and shuffle the result
-            string combined = letters + numbers;
-            string shuffled = new string(combined.OrderBy(_ => random.Next()).ToArray());
+            string shuffled = new string(numbers.OrderBy(_ => random.Next()).ToArray());
 
-            return shuffled;
+            return int.Parse(shuffled);
         }
 
         private async Task<string> GetEmailByUsernameAsync(string username)

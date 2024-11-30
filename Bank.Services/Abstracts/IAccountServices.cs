@@ -10,7 +10,7 @@ namespace Bank.Services.Abstracts
         Task<object> GetAccountAsync(string userame);
         Task<object> GetAccountByIdAsync(string STRING);
         Task<Account> GetAccountByUsernameAsync(string username);
-        Task<Account> GetAccountByAccountNumberAsync(string accountNumber);
+        Task<Account> GetAccountByAccountNumberAsync(int accountNumber);
         Task UpdateAccountAsync(Account account);
     }
 }

@@ -2,7 +2,7 @@
 {
     public class GetAccountByNameResponse
     {
-        public string AccountNumber { get; set; }
+        public int AccountNumber { get; set; }
         public decimal Balance { get; set; }
         public DateTime CreatedAt { get; set; }
         public string Email { get; set; }

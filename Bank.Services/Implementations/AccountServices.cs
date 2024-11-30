@@ -28,7 +28,7 @@ namespace Bank.Services.Implementations
             return await _accountRepository.GetAccountAsync(username);
         }
 
-        public async Task<Account> GetAccountByAccountNumberAsync(string accountNumber)
+        public async Task<Account> GetAccountByAccountNumberAsync(int accountNumber)
         {
             return await _accountRepository.GetAccountByAccountNumberAsync(accountNumber);
         }

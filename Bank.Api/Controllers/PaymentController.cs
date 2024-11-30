@@ -1,5 +1,6 @@
 ﻿using Bank.Core.Features.Payments.Commands.Models;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Bank.Api.Controllers
@@ -16,6 +17,7 @@ namespace Bank.Api.Controllers
         }
 
         [HttpPost("ProcessPayment")]
+        [Authorize]
         public async Task<IActionResult> ProcessPayment([FromBody] PaymentCommand paymentCommand)
         {
             if (paymentCommand == null)
@@ -34,6 +36,7 @@ namespace Bank.Api.Controllers
         }
 
         [HttpPost("Transfer")]
+        [Authorize]
         public async Task<IActionResult> Transfer([FromBody] TransferCommand transferCommand)
         {
             if (transferCommand == null)

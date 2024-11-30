@@ -33,7 +33,7 @@ namespace Bank.Core.Features.Accounts.Queries.Handlers
             var mappedAccounts = accounts.Select(account => new GetAccountsPaginationReponse
             {
                 Id = (int)account.GetType().GetProperty("Id").GetValue(account),
-                AccountNumber = (string)account.GetType().GetProperty("AccountNumber").GetValue(account),
+                AccountNumber = (int)account.GetType().GetProperty("AccountNumber").GetValue(account),
                 Balance = (decimal)account.GetType().GetProperty("Balance").GetValue(account),
                 CreatedAt = (DateTime)account.GetType().GetProperty("CreatedAt").GetValue(account),
                 UserName = (string)account.GetType().GetProperty("UserName").GetValue(account),
@@ -87,7 +87,7 @@ namespace Bank.Core.Features.Accounts.Queries.Handlers
             // Map the account data to the response DTO
             var response = new GetAccountByNameResponse
             {
-                AccountNumber = (string)account.GetType().GetProperty("AccountNumber").GetValue(account),
+                AccountNumber = (int)account.GetType().GetProperty("AccountNumber").GetValue(account),
                 Balance = (decimal)account.GetType().GetProperty("Balance").GetValue(account),
                 CreatedAt = (DateTime)account.GetType().GetProperty("CreatedAt").GetValue(account),
                 Email = (string)account.GetType().GetProperty("Email").GetValue(account),
@@ -119,7 +119,7 @@ namespace Bank.Core.Features.Accounts.Queries.Handlers
             // Map accounts to GetAccountByIdResponse
             var mappedAccounts = new GetAccountByIdResponse
             {
-                AccountNumber = (string)account.GetType().GetProperty("AccountNumber").GetValue(account),
+                AccountNumber = (int)account.GetType().GetProperty("AccountNumber").GetValue(account),
                 Balance = (decimal)account.GetType().GetProperty("Balance").GetValue(account),
                 CreatedAt = (DateTime)account.GetType().GetProperty("CreatedAt").GetValue(account),
                 UserName = (string)account.GetType().GetProperty("UserName").GetValue(account),

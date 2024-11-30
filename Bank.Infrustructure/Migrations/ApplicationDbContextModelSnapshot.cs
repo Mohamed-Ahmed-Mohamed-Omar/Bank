@@ -30,9 +30,8 @@ namespace Bank.Infrustructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("AccountNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("AccountNumber")
+                        .HasColumnType("int");
 
                     b.Property<decimal>("Balance")
                         .HasColumnType("decimal(18,2)");

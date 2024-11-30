@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Bank.Infrustructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241130143618_Initial")]
+    [Migration("20241130184913_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -33,9 +33,8 @@ namespace Bank.Infrustructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("AccountNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("AccountNumber")
+                        .HasColumnType("int");
 
                     b.Property<decimal>("Balance")
                         .HasColumnType("decimal(18,2)");

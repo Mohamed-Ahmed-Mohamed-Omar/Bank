@@ -92,12 +92,8 @@ namespace Bank.Infrustructure.Repositories
                     throw new ArgumentException("Receiver's account ID cannot be null.");
                 }
 
-                // Retrieve the receiver's account using the account number
-                var receiverAccount = await _accountRepository.GetAccountByAccountNumberAsync(payment.ReceiverAccountId.ToString());
-                if (receiverAccount == null)
-                {
-                    throw new InvalidOperationException("Receiver's account not found.");
-                }
+                //Retrieve the receiver's account using the account number
+                var receiverAccount = await _accountRepository.GetAccountByAccountNumberAsync(payment.ReceiverAccountId.Value);
 
                 // Validate the transfer amount
                 if (payment.Amount <= 0)

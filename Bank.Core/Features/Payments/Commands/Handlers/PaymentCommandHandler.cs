@@ -4,7 +4,6 @@ using Bank.Core.Features.Payments.Commands.Models;
 using Bank.Data.Entities;
 using Bank.Services.Abstracts;
 using Bank.Services.AuthServices.Interfaces;
-using Bank.Services.Implementations;
 using MediatR;
 
 namespace Bank.Core.Features.Payments.Commands.Handlers
@@ -89,6 +88,7 @@ namespace Bank.Core.Features.Payments.Commands.Handlers
             {
                 // Retrieve the sender's account using the username
                 var senderUsername = _currentUserService.GetUserNameAsync();
+
                 var senderAccount = await _accountServices.GetAccountByUsernameAsync(senderUsername);
                 if (senderAccount == null)
                 {
@@ -147,12 +147,6 @@ namespace Bank.Core.Features.Payments.Commands.Handlers
                 // Perform the transfer using the payment service
                 var paymentResult = await _paymentServices.TransferAsync(payment, senderUsername);
 
-                // Update sender and receiver accounts
-                senderAccount.Balance -= request.Amount;
-                receiverAccount.Balance += request.Amount;
-                await _accountServices.UpdateAccountAsync(senderAccount);
-                await _accountServices.UpdateAccountAsync(receiverAccount);
-
                 // Send email to sender
                 var senderEmail = await _currentUserService.GetEmailByUsernameAsync(senderUsername);
                 var senderEmailMessage = $@"
@@ -164,6 +158,7 @@ namespace Bank.Core.Features.Payments.Commands.Handlers
                         <p><strong>Payment Type:</strong> {paymentResult.PaymentType}</p>
                         <p><strong>Description:</strong> {paymentResult.Description}</p>
                         <p><strong>Payment Date:</strong> {paymentResult.PaymentDate}</p>
+                        <p><strong>Balance:</strong> {payment.Account.Balance}</p>
                         <p><strong>Status:</strong> Completed</p>
                     </body>
                 </html>
@@ -171,7 +166,7 @@ namespace Bank.Core.Features.Payments.Commands.Handlers
                 await _emailsService.SendEmail(senderEmail, senderEmailMessage, "Transfer Completed");
 
                 // Send email to receiver
-                var receiverEmail = receiverAccount.UserName; // Assuming receiver's email is stored in UserName field
+                var receiverEmail = await _currentUserService.GetEmailByUsernameAsync(receiverAccount.UserName);// Assuming receiver's email is stored in UserName field
                 var receiverEmailMessage = $@"
                 <html>
                     <body>
@@ -181,6 +176,7 @@ namespace Bank.Core.Features.Payments.Commands.Handlers
                         <p><strong>Payment Type:</strong> {paymentResult.PaymentType}</p>
                         <p><strong>Description:</strong> {paymentResult.Description}</p>
                         <p><strong>Payment Date:</strong> {paymentResult.PaymentDate}</p>
+                        <p><strong>Balance:</strong> {receiverAccount.Balance}</p>
                         <p><strong>Status:</strong> Completed</p>
                     </body>
                 </html>
@@ -220,7 +216,7 @@ namespace Bank.Core.Features.Payments.Commands.Handlers
                 <p><strong>Description:</strong> {payment.Description}</p>
                 <p><strong>Payment Date:</strong> {payment.PaymentDate}</p>
                 <p><strong>Status:</strong> {status}</p>
-                <p><strong>Balance:</strong> {payment.Account?.Balance}</p>
+                <p><strong>Balance:</strong> {payment.Account.Balance}</p>
                 <p><strong>Payment Method:</strong> {payment.PaymentMethod}</p>
                 {additionalMessage}
             </body>
