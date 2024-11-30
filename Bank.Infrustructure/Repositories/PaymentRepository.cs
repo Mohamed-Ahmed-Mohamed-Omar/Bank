@@ -72,6 +72,77 @@ namespace Bank.Infrustructure.Repositories
             }
         }
 
+        public async Task<Payment> TransferAsync(Payment payment, string username)
+        {
+            // Begin a database transaction
+            using var transaction = await _context.Database.BeginTransactionAsync();
+
+            try
+            {
+                // Retrieve the sender's account using the username
+                var senderAccount = await _accountRepository.GetAccountByUsernameAsync(username);
+                if (senderAccount == null)
+                {
+                    throw new InvalidOperationException("Sender's account not found.");
+                }
+
+                // Validate ReceiverAccountId
+                if (payment.ReceiverAccountId == null)
+                {
+                    throw new ArgumentException("Receiver's account ID cannot be null.");
+                }
+
+                // Retrieve the receiver's account using the account number
+                var receiverAccount = await _accountRepository.GetAccountByAccountNumberAsync(payment.ReceiverAccountId.ToString());
+                if (receiverAccount == null)
+                {
+                    throw new InvalidOperationException("Receiver's account not found.");
+                }
+
+                // Validate the transfer amount
+                if (payment.Amount <= 0)
+                {
+                    throw new ArgumentException("Transfer amount must be greater than zero.");
+                }
+
+                // Check sender's balance
+                if (senderAccount.Balance < payment.Amount)
+                {
+                    throw new InvalidOperationException("Insufficient balance for this transfer.");
+                }
+
+                // Update balances
+                senderAccount.Balance -= payment.Amount;
+                receiverAccount.Balance += payment.Amount;
+
+                // Create a payment record
+                payment.AccountId = senderAccount.Id;
+                payment.PaymentDate = DateTime.UtcNow;
+                payment.Status = 1; // Mark as completed
+                payment.ReferenceNumber = GenerateRandomNumber(); // Generate reference number
+                payment.PaymentType = "Transfer";
+
+                // Save payment and update accounts
+                _context.payments.Add(payment);
+                _context.accounts.Update(senderAccount);
+                _context.accounts.Update(receiverAccount);
+
+                // Save changes
+                await _context.SaveChangesAsync();
+
+                // Commit transaction
+                await transaction.CommitAsync();
+
+                return payment;
+            }
+            catch (Exception ex)
+            {
+                // Rollback transaction in case of errors
+                await transaction.RollbackAsync();
+                throw new InvalidOperationException($"Transfer failed: {ex.Message}", ex);
+            }
+        }
+
         public Task<IQueryable<Payment>> GetAllPaymentsAsync(string? username)
         {
             throw new NotImplementedException();

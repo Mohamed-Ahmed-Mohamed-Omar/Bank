@@ -28,6 +28,11 @@ namespace Bank.Services.Implementations
             return await _accountRepository.GetAccountAsync(username);
         }
 
+        public async Task<Account> GetAccountByAccountNumberAsync(string accountNumber)
+        {
+            return await _accountRepository.GetAccountByAccountNumberAsync(accountNumber);
+        }
+
         public async Task<object> GetAccountByIdAsync(string username)
         {
             return await _accountRepository.GetAccountByIdAsync(username);
@@ -41,6 +46,11 @@ namespace Bank.Services.Implementations
         public async Task<IQueryable<object>> GetAllAccountsAsync()
         {
             return await _accountRepository.GetAllAccountsAsync();
+        }
+
+        public Task UpdateAccountAsync(Account account)
+        {
+            return _accountRepository.UpdateAccountAsync(account);
         }
     }
 }

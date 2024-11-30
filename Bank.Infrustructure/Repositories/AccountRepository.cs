@@ -193,6 +193,36 @@ namespace Bank.Infrustructure.Repositories
                                   .FirstOrDefaultAsync(acc => acc.UserName == username);
         }
 
+        public async Task<Account> GetAccountByAccountNumberAsync(string accountNumber)
+        {
+            if (string.IsNullOrEmpty(accountNumber))
+            {
+                throw new ArgumentNullException(nameof(accountNumber), "Account number cannot be null or empty.");
+            }
+
+            // Use LINQ to query the database for the account with the specified account number
+            var account = await _context.accounts
+                .FirstOrDefaultAsync(a => a.AccountNumber == accountNumber);
+
+            if (account == null)
+            {
+                throw new InvalidOperationException("Account not found.");
+            }
+
+            return account;
+        }
+
+        public async Task UpdateAccountAsync(Account account)
+        {
+            if (account == null)
+            {
+                throw new ArgumentNullException(nameof(account), "Account cannot be null.");
+            }
+
+            _context.accounts.Update(account);
+            await _context.SaveChangesAsync();
+        }
+
         private static string GenerateRandomString()
         {
             Random random = new Random();
