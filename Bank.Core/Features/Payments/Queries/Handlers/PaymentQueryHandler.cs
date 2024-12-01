@@ -164,7 +164,7 @@ namespace Bank.Core.Features.Payments.Queries.Handlers
                             Description = (string)payment.GetType().GetProperty("Description").GetValue(payment),
                             PaymentDate = (DateTime)payment.GetType().GetProperty("PaymentDate").GetValue(payment),
                             PaymentMethod = (string)payment.GetType().GetProperty("PaymentMethod").GetValue(payment),
-                            PaymentType = (string)payment.GetType().GetProperty("PaymentType").GetValue(payment),
+                            PaymentType = "Transfer",
                             ReceiverAccountId = (int)payment.GetType().GetProperty("ReceiverAccountId").GetValue(payment),
                             ReferenceNumber = (int)payment.GetType().GetProperty("ReferenceNumber").GetValue(payment),
                             ReceiverUsername = (string)payment.GetType().GetProperty("ReceiverUsername").GetValue(payment),
@@ -204,19 +204,16 @@ namespace Bank.Core.Features.Payments.Queries.Handlers
         {
             try
             {
-                // Fetch Current User
-                var user = _currentUserService.GetUserNameAsync();
-
                 // Fetch Payments By Username
-                var payments = await _paymentServices.GetAllsTransfersByUsernameAsync(user);
+                var payments = await _paymentServices.GetAllsTransfersAsync();
 
                 // Map accounts to GetAccountsPaginationReponse
-                var mappedpayments = payments.Select(payment => 
+                var mappedPayments = payments.Select(payment =>
                 {
                     try
                     {
                         // Get the Status as int and determine the description
-                        byte paymentStatus = payments.GetType().GetProperty("Status")?.GetValue(payment) as byte? ?? 0;
+                        byte paymentStatus = payment.GetType().GetProperty("Status")?.GetValue(payment) as byte? ?? 0;
                         string statusDescription = paymentStatus == 1 ? "Completed" : "Failed"; // Convert status to string description
 
                         return new GetAllsTransfersResult
@@ -225,12 +222,13 @@ namespace Bank.Core.Features.Payments.Queries.Handlers
                             Description = (string)payment.GetType().GetProperty("Description").GetValue(payment),
                             PaymentDate = (DateTime)payment.GetType().GetProperty("PaymentDate").GetValue(payment),
                             PaymentMethod = (string)payment.GetType().GetProperty("PaymentMethod").GetValue(payment),
-                            PaymentType = (string)payment.GetType().GetProperty("PaymentType").GetValue(payment),
-                            AccountNumberReceiver = (int)payment.GetType().GetProperty("AccountNumberReceiver").GetValue(payment),
+                            PaymentType = "Transfer",
+                            UsernameSender = (string)payment.GetType().GetProperty("UsernameSender").GetValue(payment),
                             ReferenceNumber = (int)payment.GetType().GetProperty("ReferenceNumber").GetValue(payment),
-                            ReceiverUsername = (string)payment.GetType().GetProperty("ReceiverUsername").GetValue(payment),
+                            ReceiverUsername = (string)payment.GetType().GetProperty("UsernameReceiver").GetValue(payment),
                             Status = statusDescription,
-                            AccountNumberSender = (int)payment.GetType().GetProperty("AccountNumberSender").GetValue(payment)
+                            AccountNumberSender = (int)payment.GetType().GetProperty("AccountNumberSender").GetValue(payment),
+                            AccountNumberReceiver = (int)payment.GetType().GetProperty("AccountNumberReceiver").GetValue(payment)
                         };
                     }
                     catch (Exception ex)
@@ -240,25 +238,14 @@ namespace Bank.Core.Features.Payments.Queries.Handlers
                 }).ToList();
 
                 // Apply pagination
-                IEnumerable<GetAllsTransfersResult> usersQuery;
+                var paginatedResult = await mappedPayments.ToPaginatedListAsync(request.PageNumber, request.PageSize);
 
-                // Check if we should use IQueryable or List based on the source
-                if (mappedpayments is IQueryable<GetAllsTransfersResult>)
-                {
-                    usersQuery = mappedpayments.AsQueryable(); // Use AsQueryable if it's IQueryable
-                }
-                else
-                {
-                    usersQuery = mappedpayments; // Use the List directly if it's a List
-                }
-
-                // Return paginated result
-                return await usersQuery.ToPaginatedListAsync(request.PageNumber, request.PageSize);
+                return paginatedResult;
             }
             catch (Exception ex)
             {
                 // Handle exception and return error message
-                throw new Exception($"An error occurred while fetching payments: {ex.Message}");
+                throw new Exception($"An error occurred while fetching payments: {ex.Message}", ex);
             }
         }
     }

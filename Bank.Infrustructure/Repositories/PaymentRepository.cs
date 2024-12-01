@@ -5,6 +5,7 @@ using Bank.Infrustructure.Context;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel;
+using System.Reflection;
 
 namespace Bank.Infrustructure.Repositories
 {
@@ -168,22 +169,23 @@ namespace Bank.Infrustructure.Repositories
 
         public async Task<List<object>> GetAllsTransfersByUsernameAsync(string username)
         {
+            // Fetch data with LINQ query using a join to get receiver account details
             var data = await (from payment in _context.payments
                               join receiverAccount in _context.accounts
                               on payment.ReceiverAccountId equals receiverAccount.Id
-                              where payment.ReceiverAccountId != null && receiverAccount.UserName == username
+                              where payment.Account.UserName == username && payment.ReceiverAccountId != null
                               select new
                               {
                                   // Conversion data
                                   Amount = payment.Amount,
                                   Description = payment.Description,
-                                  PaymentMethod = payment.PaymentMethod,
                                   ReferenceNumber = payment.ReferenceNumber,
                                   Status = payment.Status,
                                   PaymentDate = payment.PaymentDate,
+                                  PaymentMethod = payment.PaymentMethod,
 
                                   // Receiver data
-                                  ReceiverAccountId = payment.ReceiverAccountId,
+                                  ReceiverAccountId = receiverAccount.AccountNumber,
                                   ReceiverUsername = receiverAccount.UserName
                               }).ToListAsync();
 
@@ -192,16 +194,20 @@ namespace Bank.Infrustructure.Repositories
 
             foreach (var item in data)
             {
+                // Determine status description
+                string statusDescription = item.Status == 1 ? "Completed" : "Failed";
 
+                // Add the result to the list
                 result.Add(new
                 {
                     item.ReceiverUsername,
                     item.Amount,
                     item.Description,
-                    item.PaymentMethod,
                     item.ReferenceNumber,
                     item.PaymentDate,
-                    item.ReceiverAccountId
+                    item.PaymentMethod,
+                    ReceiverAccountId = item.ReceiverAccountId,
+                    StatusDescription = statusDescription,
                 });
             }
 
@@ -268,10 +274,11 @@ namespace Bank.Infrustructure.Repositories
 
         public async Task<List<object>> GetAllsTransfersAsync()
         {
+            // Fetch data with LINQ query
             var data = await (from payment in _context.payments
                               join receiverAccount in _context.accounts
-                              on payment.ReceiverAccountId equals receiverAccount.Id into receiverGroup
-                              from receiver in receiverGroup.DefaultIfEmpty()
+                              on payment.ReceiverAccountId equals receiverAccount.Id
+                              where payment.ReceiverAccountId != null
                               select new
                               {
                                   // Sender data
@@ -279,8 +286,8 @@ namespace Bank.Infrustructure.Repositories
                                   AccountNumberSender = payment.Account.AccountNumber,
 
                                   // Receiver data
-                                  ReceiverUsername = receiver.UserName,
-                                  AccountNumberReceiver = receiver.AccountNumber,
+                                  UsernameReceiver = receiverAccount.UserName,
+                                  AccountNumberReceiver = receiverAccount.AccountNumber,
 
                                   // Conversion data
                                   Amount = payment.Amount,
@@ -289,29 +296,29 @@ namespace Bank.Infrustructure.Repositories
                                   ReferenceNumber = payment.ReferenceNumber,
                                   Status = payment.Status,
                                   PaymentDate = payment.PaymentDate,
-                              }).ToListAsync(); // Asynchronously retrieve the data
+                              }).ToListAsync();
 
             // Prepare the result list
             var result = new List<object>();
 
             foreach (var item in data)
             {
-
+                // Add the result to the list
                 result.Add(new
                 {
-                    item.UsernameSender,
-                    item.AccountNumberSender,
-                    item.ReceiverUsername,
-                    item.AccountNumberReceiver,
-                    item.Amount,
-                    item.Description,
-                    item.PaymentMethod,
-                    item.ReferenceNumber,
-                    item.PaymentDate
+                    UsernameSender = item.UsernameSender,
+                    AccountNumberSender = item.AccountNumberSender,
+                    UsernameReceiver = item.UsernameReceiver,
+                    AccountNumberReceiver = item.AccountNumberReceiver,
+                    Amount = item.Amount,
+                    Description = item.Description,
+                    PaymentMethod = item.PaymentMethod,
+                    ReferenceNumber = item.ReferenceNumber,
+                    PaymentDate = item.PaymentDate,
+                    Status = item.Status
                 });
             }
 
-            // Return the result list
             return result;
         }
 

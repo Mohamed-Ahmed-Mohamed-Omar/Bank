@@ -67,7 +67,7 @@ namespace Bank.Api.Controllers
             var result = await _mediator.Send(query);
             if (result != null)
                 return Ok(result);
-            return BadRequest(result);
+            return BadRequest(result.Messages);
         }
 
         // Endpoint to get all payments
@@ -82,7 +82,7 @@ namespace Bank.Api.Controllers
             var result = await _mediator.Send(query);
             if (result != null)
                 return Ok(result);
-            return BadRequest(result);
+            return BadRequest(result.Messages);
         }
 
         // Endpoint to get all transfers by username
@@ -97,7 +97,7 @@ namespace Bank.Api.Controllers
             var result = await _mediator.Send(query);
             if (result != null)
                 return Ok(result);
-            return BadRequest(result);
+            return BadRequest(result.Messages);
         }
 
         // Endpoint to get all transfers
@@ -112,7 +112,7 @@ namespace Bank.Api.Controllers
             var result = await _mediator.Send(query);
             if (result != null)
                 return Ok(result);
-            return BadRequest(result);
+            return BadRequest(result.Messages);
         }
     }
 }
