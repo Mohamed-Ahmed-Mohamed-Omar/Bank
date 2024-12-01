@@ -6,6 +6,9 @@ namespace Bank.Infrustructure.Abstracts
     {
         Task<Payment> PaymentAsync(Payment paymentm, string username);
         Task<Payment> TransferAsync(Payment payment, string username);
-        Task<IQueryable<Payment>> GetAllPaymentsAsync(string? username); // Task<IQueryable<Payment>> GetAllPaymentsAsync();
+        Task<List<object>> GetAllPaymentsByUsernameAsync(string username);
+        Task<List<object>> GetAllPaymentsAsync();
+        Task<List<object>> GetAllsTransfersByUsernameAsync(string username);
+        Task<List<object>> GetAllsTransfersAsync();
     }
 }

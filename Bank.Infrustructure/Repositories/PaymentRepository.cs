@@ -1,6 +1,10 @@
 ﻿using Bank.Data.Entities;
+using Bank.Data.Entities.Identity;
 using Bank.Infrustructure.Abstracts;
 using Bank.Infrustructure.Context;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using System.ComponentModel;
 
 namespace Bank.Infrustructure.Repositories
 {
@@ -8,11 +12,13 @@ namespace Bank.Infrustructure.Repositories
     {
         private readonly ApplicationDbContext _context;
         private readonly IAccountRepository _accountRepository;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public PaymentRepository(ApplicationDbContext context, IAccountRepository accountRepository)
+        public PaymentRepository(ApplicationDbContext context, IAccountRepository accountRepository, UserManager<ApplicationUser> userManager)
         {
             _context = context;
             _accountRepository = accountRepository;
+            _userManager = userManager;
         }
 
         public async Task<Payment> PaymentAsync(Payment payment, string username)
@@ -44,6 +50,7 @@ namespace Bank.Infrustructure.Repositories
                 payment.AccountId = account.Id;
                 payment.PaymentDate = DateTime.UtcNow;
                 payment.ReferenceNumber = GenerateRandomNumber();
+                payment.Status = 1; // Mark as completed
 
                 // Add the payment to the database
                 _context.payments.Add(payment);
@@ -139,9 +146,173 @@ namespace Bank.Infrustructure.Repositories
             }
         }
 
-        public Task<IQueryable<Payment>> GetAllPaymentsAsync(string? username)
+        public async Task<List<object>> GetAllPaymentsByUsernameAsync(string username)
         {
-            throw new NotImplementedException();
+            var data = await _context.payments
+                .Where(e => e.Account.UserName == username && e.Status != null && e.ReceiverAccountId == null)
+                .Select(s => new
+                {
+                    Amount = s.Amount,
+                    Description = s.Description,
+                    PaymentDate = s.PaymentDate,
+                    PaymentMethod = s.PaymentMethod,
+                    PaymentType = s.PaymentType,
+                    ReferenceNumber = s.ReferenceNumber,
+                    Status = s.Status 
+                })
+                .ToListAsync();
+
+            // Returning as List<object>
+            return data.Cast<object>().ToList();
+        }
+
+        public async Task<List<object>> GetAllsTransfersByUsernameAsync(string username)
+        {
+            var data = await (from payment in _context.payments
+                              join receiverAccount in _context.accounts
+                              on payment.ReceiverAccountId equals receiverAccount.Id
+                              where payment.ReceiverAccountId != null && receiverAccount.UserName == username
+                              select new
+                              {
+                                  // Conversion data
+                                  Amount = payment.Amount,
+                                  Description = payment.Description,
+                                  PaymentMethod = payment.PaymentMethod,
+                                  ReferenceNumber = payment.ReferenceNumber,
+                                  Status = payment.Status,
+                                  PaymentDate = payment.PaymentDate,
+
+                                  // Receiver data
+                                  ReceiverAccountId = payment.ReceiverAccountId,
+                                  ReceiverUsername = receiverAccount.UserName
+                              }).ToListAsync();
+
+            // Prepare the result list
+            var result = new List<object>();
+
+            foreach (var item in data)
+            {
+
+                result.Add(new
+                {
+                    item.ReceiverUsername,
+                    item.Amount,
+                    item.Description,
+                    item.PaymentMethod,
+                    item.ReferenceNumber,
+                    item.PaymentDate,
+                    item.ReceiverAccountId
+                });
+            }
+
+            return result;
+        }
+
+        public async Task<List<object>> GetAllPaymentsAsync()
+        {
+            // Fetch the payments from the database
+            var payments = await _context.payments
+                .Where(s => (s != null && s.Account != null && s.Account.UserName != null) && (s.Status != null && s.ReceiverAccountId == null))
+                .Select(s => new
+                {
+                    s.Id,
+                    Username = s.Account.UserName,
+                    s.Amount,
+                    s.Description,
+                    s.PaymentDate,
+                    s.PaymentMethod,
+                    s.PaymentType,
+                    s.ReferenceNumber,
+                    s.Status
+                })
+                .ToListAsync(); // Asynchronously fetch payments
+
+            // Check if the payment list is empty
+            if (payments == null || !payments.Any())
+            {
+                throw new Exception("No payments found.");
+            }
+
+            // Prepare a list of results
+            var result = new List<object>();
+
+            foreach (var payment in payments)
+            {
+                if (payment == null)
+                {
+                    throw new Exception("Payment is null.");
+                }
+
+                // Fetch email asynchronously based on the username
+                var email = await GetEmailByUsernameAsync(payment.Username);
+
+                // Add the result to the list
+                result.Add(new
+                {
+                    payment.Id,
+                    payment.Username,
+                    payment.Amount,
+                    payment.Description,
+                    payment.PaymentDate,
+                    payment.PaymentMethod,
+                    payment.PaymentType,
+                    payment.ReferenceNumber,
+                    payment.Status, 
+                    Email = email
+                });
+            }
+
+            // Return the final result as List<object>
+            return result;
+        }
+
+        public async Task<List<object>> GetAllsTransfersAsync()
+        {
+            var data = await (from payment in _context.payments
+                              join receiverAccount in _context.accounts
+                              on payment.ReceiverAccountId equals receiverAccount.Id into receiverGroup
+                              from receiver in receiverGroup.DefaultIfEmpty()
+                              select new
+                              {
+                                  // Sender data
+                                  UsernameSender = payment.Account.UserName,
+                                  AccountNumberSender = payment.Account.AccountNumber,
+
+                                  // Receiver data
+                                  ReceiverUsername = receiver.UserName,
+                                  AccountNumberReceiver = receiver.AccountNumber,
+
+                                  // Conversion data
+                                  Amount = payment.Amount,
+                                  Description = payment.Description,
+                                  PaymentMethod = payment.PaymentMethod,
+                                  ReferenceNumber = payment.ReferenceNumber,
+                                  Status = payment.Status,
+                                  PaymentDate = payment.PaymentDate,
+                              }).ToListAsync(); // Asynchronously retrieve the data
+
+            // Prepare the result list
+            var result = new List<object>();
+
+            foreach (var item in data)
+            {
+
+                result.Add(new
+                {
+                    item.UsernameSender,
+                    item.AccountNumberSender,
+                    item.ReceiverUsername,
+                    item.AccountNumberReceiver,
+                    item.Amount,
+                    item.Description,
+                    item.PaymentMethod,
+                    item.ReferenceNumber,
+                    item.PaymentDate
+                });
+            }
+
+            // Return the result list
+            return result;
         }
 
         private static int GenerateRandomNumber()
@@ -157,6 +328,21 @@ namespace Bank.Infrustructure.Repositories
             string shuffled = new string(numbers.OrderBy(_ => random.Next()).ToArray());
 
             return int.Parse(shuffled);
+        }
+
+        private async Task<string> GetEmailByUsernameAsync(string username)
+        {
+            if (string.IsNullOrEmpty(username))
+                throw new ArgumentException("Username cannot be null or empty.");
+
+            // Retrieve the user by username
+            var user = await _userManager.FindByNameAsync(username);
+
+            if (user == null)
+                throw new ArgumentException($"User with username '{username}' does not exist.");
+
+            // Return the email
+            return user.Email;
         }
     }
 }

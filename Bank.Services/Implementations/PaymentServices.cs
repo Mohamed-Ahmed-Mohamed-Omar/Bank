@@ -13,6 +13,26 @@ namespace Bank.Services.Implementations
             _paymentRepository = paymentRepository;
         }
 
+        public Task<List<object>> GetAllPaymentsByUsernameAsync(string username)
+        {
+            return _paymentRepository.GetAllPaymentsByUsernameAsync(username);
+        }
+
+        public Task<List<object>> GetAllsTransfersByUsernameAsync(string username)
+        {
+            return _paymentRepository.GetAllsTransfersByUsernameAsync(username);
+        }
+
+        public async Task<List<object>> GetAllPaymentsAsync()
+        {
+            return await _paymentRepository.GetAllPaymentsAsync();
+        }
+
+        public Task<List<object>> GetAllsTransfersAsync()
+        {
+            return _paymentRepository.GetAllsTransfersAsync();
+        }
+
         public async Task<Payment> PaymentAsync(Payment paymentm, string username)
         {
             return await _paymentRepository.PaymentAsync(paymentm, username);

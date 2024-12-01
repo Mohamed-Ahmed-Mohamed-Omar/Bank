@@ -33,7 +33,8 @@ namespace Bank.Api.Controllers
             //    // Redirect to the existing account details page if account exists
             //    return Redirect(response.RedirectUrl); // Redirect to the URL passed in the response
             //}
-            return Ok(response);
+            if (response.Success)
+                return Ok(response);
 
             return BadRequest(response);
         }

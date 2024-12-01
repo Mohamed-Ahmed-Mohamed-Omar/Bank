@@ -221,7 +221,7 @@ namespace Bank.Core.Features.Payments.Commands.Handlers
                 {additionalMessage}
             </body>
         </html>
-    ";
+            ";
         }
     }
 }
