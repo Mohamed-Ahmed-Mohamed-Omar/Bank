@@ -10,5 +10,6 @@ namespace Bank.Services.Abstracts
         Task<List<object>> GetAllPaymentsAsync();
         Task<List<object>> GetAllsTransfersByUsernameAsync(string username);
         Task<List<object>> GetAllsTransfersAsync();
+        Task<object> GetPaymentDetailsAsync(string username, string PaymentMethod, string Description, string PaymentType, decimal Amount);
     }
 }

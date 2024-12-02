@@ -4,8 +4,6 @@ using Bank.Infrustructure.Abstracts;
 using Bank.Infrustructure.Context;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System.ComponentModel;
-using System.Reflection;
 
 namespace Bank.Infrustructure.Repositories
 {
@@ -159,7 +157,7 @@ namespace Bank.Infrustructure.Repositories
                     PaymentMethod = s.PaymentMethod,
                     PaymentType = s.PaymentType,
                     ReferenceNumber = s.ReferenceNumber,
-                    Status = s.Status 
+                    Status = s.Status
                 })
                 .ToListAsync();
 
@@ -263,7 +261,7 @@ namespace Bank.Infrustructure.Repositories
                     payment.PaymentMethod,
                     payment.PaymentType,
                     payment.ReferenceNumber,
-                    payment.Status, 
+                    payment.Status,
                     Email = email
                 });
             }
@@ -322,6 +320,28 @@ namespace Bank.Infrustructure.Repositories
             return result;
         }
 
+        public async Task<object> GetPaymentDetailsAsync(string username, string PaymentMethod, string Description, string PaymentType, decimal Amount)
+        {
+            var paymentDetails = await _context.payments
+                .Where(e => e.Account.UserName == username)
+                .Select(s => new
+                {
+                    Id = s.Id,
+                    Amount = Amount,
+                    Description = Description,
+                    PaymentDate = s.PaymentDate,
+                    PaymentMethod = PaymentMethod,
+                    PaymentType = PaymentType,
+                    ReferenceNumber = s.ReferenceNumber,
+                    Status = s.Status,
+                    Username = username,
+                    Email = GetEmailByUsernameAsync(username)
+                })
+                .FirstOrDefaultAsync(); // Fetches a single object or null if no match is found
+
+            return paymentDetails;
+        }
+
         private static int GenerateRandomNumber()
         {
             Random random = new Random();
@@ -351,5 +371,6 @@ namespace Bank.Infrustructure.Repositories
             // Return the email
             return user.Email;
         }
+
     }
 }

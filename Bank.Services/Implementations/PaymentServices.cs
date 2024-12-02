@@ -42,5 +42,10 @@ namespace Bank.Services.Implementations
         {
             return await _paymentRepository.TransferAsync(payment, username);
         }
+
+        public async Task<object> GetPaymentDetailsAsync(string username, string PaymentMethod, string Description, string PaymentType, decimal Amount)
+        {
+            return await _paymentRepository.GetPaymentDetailsAsync(username, PaymentMethod, Description, PaymentType, Amount);
+        }
     }
 }

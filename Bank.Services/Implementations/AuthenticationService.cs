@@ -227,21 +227,21 @@ namespace Bank.Services.Implementations
                 return (authModel);
             }
 
-            //if (!user.EmailConfirmed)
-            //{
-            //    var timeSinceRegistration = DateTime.UtcNow - user.RegistrationDate;
-            //    if (timeSinceRegistration.TotalHours >= 24)
-            //    {
-            //        var result = await _userManager.DeleteAsync(user);
-            //        authModel.Message = "Email is not confirmed! And User deleted successfully!";
-            //        return authModel;
-            //    }
-            //    else
-            //    {
-            //        authModel.Message = "Email is not confirmed! User will be deleted if not confirmed within 24 hours.";
-            //        return authModel;
-            //    }
-            //}
+            if (!user.EmailConfirmed)
+            {
+                var timeSinceRegistration = DateTime.UtcNow - user.RegistrationDate;
+                if (timeSinceRegistration.TotalHours >= 24)
+                {
+                    var result = await _userManager.DeleteAsync(user);
+                    authModel.Message = "Email is not confirmed! And User deleted successfully!";
+                    return authModel;
+                }
+                else
+                {
+                    authModel.Message = "Email is not confirmed! User will be deleted if not confirmed within 24 hours.";
+                    return authModel;
+                }
+            }
 
             var jwtSecurityToken = await CreateJwtToken(user);
             var rolesList = await _userManager.GetRolesAsync(user);

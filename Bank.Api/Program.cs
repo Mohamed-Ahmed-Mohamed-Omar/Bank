@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Bank.Services;
 using Bank.Core;
 using Serilog;
+using Bank.Api.Hubs;
 
 internal class Program
 {
@@ -84,13 +85,8 @@ internal class Program
 
         app.MapControllers();
 
+        app.MapHub<PaymentHub>("/paymentHub");
+
         app.Run();
     }
 }
-
-#region Dependency injections
-
-#endregion
-#region AllowCORS
-
-#endregion
