@@ -7,6 +7,7 @@ using Bank.Services;
 using Bank.Core;
 using Serilog;
 using Bank.Api.Hubs;
+using Microsoft.AspNetCore.Builder;
 
 internal class Program
 {
@@ -25,6 +26,8 @@ internal class Program
 
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+        builder.Services.AddSignalR();
 
         #region Dependency injections
 
@@ -69,8 +72,8 @@ internal class Program
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
         {
-            app.UseSwagger();
-            app.UseSwaggerUI();
+           app.UseSwagger();
+           app.UseSwaggerUI();
         }
 
         app.UseHttpsRedirection();
